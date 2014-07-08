@@ -1,6 +1,6 @@
 {
   "name": "featuretoggle-client-node",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "feature toggle client for node",
   "main": "app.js",
   "scripts": {
