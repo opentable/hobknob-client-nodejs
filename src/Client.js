@@ -1,32 +1,40 @@
 var util = require("util"),
-    Store = require("./Store");
+    Cache = require("./Cache"),
+    events = require("events");
 
-var getToggleKey = function(applicationName, toggleName){
-    return util.format("v1/toggles/%s/%s", applicationName, toggleName);
-};
+function Client(applicationName, config) {
+    this.eventEmitter = new events.EventEmitter();
+    this.cache = new Cache(applicationName, config, this.eventEmitter);
+}
 
-var getOrDefault = function(store, applicationName, toggleName, defaultValue, callback){
-    var key = getToggleKey(applicationName, toggleName);
-    store.get(key, function(err, value){
+var getOrDefault = function(cache, toggleName, defaultValue, callback){
+    cache.get(toggleName, function(err, value){
         if (err){
             callback(err, defaultValue);
-        } else {
+        }
+        else {
+            if (value === null){
+                value = defaultValue;
+            }
             callback(null, value);
         }
     });
 };
 
-function Client(applicationName, etcdConfig) {
-    this.store = new Store(etcdConfig);
-    this.applicationName = applicationName;
-}
-
 Client.prototype.get = function(toggleName, callback){
-    getOrDefault(this.store, this.applicationName, toggleName, null, callback);
+    getOrDefault(this.cache, toggleName, null, callback);
 };
 
 Client.prototype.getOrDefault = function(toggleName, defaultValue, callback){
-    getOrDefault(this.store, this.applicationName, toggleName, defaultValue, callback);
+    getOrDefault(this.cache, toggleName, defaultValue, callback);
+};
+
+Client.prototype.dispose = function(){
+    this.cache.dispose();
+};
+
+Client.prototype.on = function(eventName, handler){
+    this.eventEmitter.on(eventName, handler);
 };
 
 module.exports = Client;
