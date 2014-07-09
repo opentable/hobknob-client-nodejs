@@ -38,7 +38,6 @@ client.on("initialized", function() {
     });
 
 });
-
 ```
 
 ### Important Note
@@ -47,7 +46,6 @@ The "error" event must be subscribed to, otherwise errors will cause the applica
 
 ```javascript
 client.on("error", function(err) { });
-
 ```
 
 ## Etcd
@@ -62,9 +60,10 @@ Feature toggles are stored in Etcd using the following convention:
 Creates a new feature toggle client
 
 ```javascript
+var Client = require("featuretoggle-client-node");
 var client = new Client("application-name", { etcdHost: "127.0.0.1" });
-
 ```
+
 - `applicationName` the name of the application used to find feature toggles
 - `config` (optional)
   - `etcdHost` (default: "127.0.0.1")
@@ -75,7 +74,7 @@ var client = new Client("application-name", { etcdHost: "127.0.0.1" });
 
 Subscribs to events emitted by the client. 
 
-- `error` [REQUIRED]
+- `error` [required]
 - `initialized`
 - `updating-cache`
 - `updated-cache`
@@ -85,7 +84,7 @@ Subscribs to events emitted by the client.
 Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return `null`
 
 - `toggleName` the name of the toggle, used with the application name to get the feature toggle value
-- `callback` function with parameters (err, value)
+- `callback` function with parameters (`err`, `value`)
 
 
 ### .getOrDefault(toggleName, defaultValue, callback)
@@ -94,4 +93,4 @@ Gets the value of a feature toggle (`true` or `false`) if exists, otherwise retu
 
 - `toggleName` the name of the toggle, used with the application name to get the feature toggle value
 - `defaultValue` the value to return if the toggle value is not found or if there is an error
-- `callback` function with parameters (err, value)
+- `callback` function with parameters (`err`, `value`)
