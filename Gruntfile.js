@@ -30,6 +30,6 @@ module.exports = function(grunt){
     grunt.registerTask('default', 'dev');
     grunt.registerTask('dev', ['jshint', 'mochaTest']);
     grunt.registerTask('test', ['mochaTest']);
-    grunt.registerTask('vagrant-test', ['vagrant-up', 'vagrant-test', 'vagrant-destroy']);
+    grunt.registerTask('vagrant', ['vagrant-up', 'vagrant-test', 'vagrant-destroy']);
 
 }
