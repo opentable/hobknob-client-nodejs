@@ -4,7 +4,7 @@
   "description": "feature toggle client for node",
   "main": "src/Client.js",
   "scripts": {
-    "test": "tests/Client.js"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",

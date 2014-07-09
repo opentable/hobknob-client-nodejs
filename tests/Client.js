@@ -4,7 +4,8 @@ var assert = require("assert"),
     Client = require("../src/Client.js"),
     Etcd = require("node-etcd"),
     etcd = new Etcd(),
-    useFakeEtcdResponses = process.env.TRAVIS === "true";
+    useFakeEtcdResponses = process.env.TRAVIS === "true",
+    testAppFeatureToggles;
 
 if (useFakeEtcdResponses){
     console.log("Using fake Etcd responses");
@@ -16,7 +17,7 @@ describe("client", function(){
 
         if (useFakeEtcdResponses) {
 
-            var testAppFeatureToggles = {
+            testAppFeatureToggles = {
                 "action": "get",
                 "node": {
                     "key": "/v1/toggles/testApp",
@@ -244,7 +245,7 @@ describe("client", function(){
         var client, cacheUpdatingCount, cacheUpdateCount;
 
         beforeEach(function(done){
-            client = new Client("testApp", {cacheInterval: 10000000});
+            client = new Client("testApp");
             client.on("updating-cache", function(){
                 cacheUpdatingCount++;
             });
@@ -263,19 +264,13 @@ describe("client", function(){
             client = null;
         });
 
-        it("cache is only updated on first get", function(done){
-            var updates = 0;
-            for(var i = 0; i < 100; i++){
-                client.get('onToggle', function(err, value){
-                    updates++;
+        it("should get the same value for the same key if called twice", function(done){
+            client.get('onToggle', function(err1, value1){
+                client.get('onToggle', function(err2, value2){
+                    assert.equal(value1, value2);
+                    done();
                 });
-            }
-            setTimeout(function(){
-                assert(updates > 1, "Should have retrieved the toggle value more than once");
-                assert.equal(cacheUpdateCount, 0, "Cache should have been updated once on initialise");
-                assert.equal(cacheUpdatingCount, 0, "Cache should not have been updated after being initialised");
-                done();
-            }, 200);
+            });
         });
 
         it("should perform well once data is cached", function(done){
@@ -295,6 +290,54 @@ describe("client", function(){
                     }
                 });
             }
+        });
+    });
+
+    describe("cache updating", function(){
+        var client, cacheUpdateCount;
+
+        beforeEach(function(done){
+            client = new Client("testApp", {cacheIntervalMs: 1000});
+            client.on("updating-cache", function(){
+                cacheUpdateCount++;
+            });
+            client.on("initialized", function(){
+
+                if (useFakeEtcdResponses) {
+                    // need to re-intercept this call, as nock removes intercepts after being called once
+                    nock("http://127.0.0.1:4001")
+                        .get("/v2/keys/v1/toggles/testApp?recursive=true")
+                        .reply(200, testAppFeatureToggles);
+                }
+                done();
+            });
+            cacheUpdateCount = 0;
+        });
+
+        afterEach(function(){
+            client.dispose();
+            client = null;
+        });
+
+        it("cache is not updated on a client get", function(done){
+            var updates = 0;
+            for(var i = 0; i < 10; i++){
+                client.get('onToggle', function(err, value){
+                    updates++;
+                });
+            }
+            setTimeout(function(){
+                assert(updates > 1, "Should have retrieved the toggle value more than once");
+                assert.equal(cacheUpdateCount, 0, "Cache should have been updated only during initialisation");
+                done();
+            }, 100);
+        });
+
+        it("cache is updated on a timer", function(done){
+            setTimeout(function(){
+                assert.equal(cacheUpdateCount, 1, "Cache should have been updated once since initialisation");
+                done();
+            }, 1100);
         });
     });
 });
