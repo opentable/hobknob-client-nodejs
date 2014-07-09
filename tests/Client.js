@@ -4,7 +4,7 @@ var assert = require("assert"),
     Client = require("../src/Client.js"),
     Etcd = require("node-etcd"),
     etcd = new Etcd(),
-    useFakeEtcdResponses = process.env.TRAVIS === "true",
+    useFakeEtcdResponses = true,
     testAppFeatureToggles;
 
 if (useFakeEtcdResponses){
