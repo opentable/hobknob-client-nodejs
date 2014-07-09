@@ -76,7 +76,6 @@ Cache.prototype.get = function(toggle, callback){
     }
     else {
         var error = new Error("Cache not initialized");
-        self.eventEmitter.emit("error", error);
         callback(error, null);
     }
 };
