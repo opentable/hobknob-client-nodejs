@@ -1,10 +1,10 @@
 {
   "name": "featuretoggle-client-node",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "feature toggle client for node",
-  "main": "app.js",
+  "main": "src/Client.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tests/Clinet.js"
   },
   "repository": {
     "type": "git",
