@@ -217,7 +217,7 @@ describe("client", function(){
         });
 
         it("should perform well once data is cached", function(done){
-            var updates = 0, startTime = 0, endTime = 0, runs = 1000000;
+            var updates = 0, startTime = 0, endTime = 0, runs = 10000;
             for(var i = 0; i < runs; i++){
                 client.get('onToggle', function(err, value){
                     if (updates === 0){

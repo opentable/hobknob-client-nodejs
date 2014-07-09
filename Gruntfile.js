@@ -29,6 +29,7 @@ module.exports = function(grunt){
     // Build & Test tasks
     grunt.registerTask('default', 'dev');
     grunt.registerTask('dev', ['jshint', 'mochaTest']);
+    grunt.registerTask('test', ['mochaTest']);
 
     grunt.registerTask('acceptance', [
         'vagrant-up',
