@@ -1,10 +1,10 @@
 {
   "name": "featuretoggle-client-node",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "feature toggle client for node",
-  "main": "app.js",
+  "main": "src/Client.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "grunt-mocha-test": "^0.11.0",
     "jshint": "^2.5.2",
     "shelljs": "^0.3.0",
-    "matchdep": "^0.3.0"
+    "matchdep": "^0.3.0",
+    "nock": "^0.42.0"
   }
 }

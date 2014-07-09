@@ -1,39 +1,38 @@
+var shell = require('shelljs');
 'use strict';
 
 module.exports = function(grunt){
 
-    var taskObject = {
-        pkg: grunt.file.readJSON('package.json')
-    };
-
-    // Loop through the tasks in the 'grunt-tasks' folder, ignore any with an underscore at
-    // the beginning, and add them to the taskObject
-    // or invoke if they are functions
-    grunt.file.expand('grunt-tasks/*.js', '!grunt-tasks/_*.js').forEach(function(file) {
-        var name = file.split('/');
-        name = name[name.length - 1].replace('.js', '');
-        var task = require('./'+ file);
-
-        if(grunt.util._.isFunction(task)){
-            task(grunt);
-        } else {
-            taskObject[name] = task;
+    grunt.initConfig({
+        jshint: {
+            all: [
+                'Gruntfile.js',
+                'src/**/*.js'
+            ],
+            options: {
+                jshintrc: '.jshint'
+            }
+        },
+        mochaTest:{
+            options: {
+                reporter: 'spec'
+            },
+            tests:{
+                src: ['tests/*.js']
+            }
         }
     });
 
-    grunt.initConfig(taskObject);
+    grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-mocha-test');
 
-    // Automatically load in all Grunt npm tasks
-    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
-
-    // Build & Test tasks
     grunt.registerTask('default', 'dev');
     grunt.registerTask('dev', ['jshint', 'mochaTest']);
+    grunt.registerTask('test', ['mochaTest']);
 
-    grunt.registerTask('acceptance', [
-        'vagrant-up',
-        'vagrant-test',
-        'vagrant-destroy'
-    ]);
+    grunt.registerTask('vagrant-up', function(){ shell.exec('vagrant up'); });
+    grunt.registerTask('vagrant-destroy', function(){ shell.exec('vagrant destroy -f'); });
+    grunt.registerTask('vagrant-test', [ 'mochaTest' ]);
+    grunt.registerTask('vagrant', ['vagrant-up', 'vagrant-test', 'vagrant-destroy']);
 
 }

@@ -1,67 +1,40 @@
-var Etcd = require("node-etcd"),
-    util = require("util"),
-    _ = require("underscore");
+var util = require("util"),
+    Cache = require("./Cache"),
+    events = require("events");
 
-var getToggleKey = function(applicationName, toggleName){
-    return util.format("v1/toggles/%s/%s", applicationName, toggleName);
-};
+function Client(applicationName, config) {
+    this.eventEmitter = new events.EventEmitter();
+    this.cache = new Cache(applicationName, config, this.eventEmitter);
+}
 
-var validateResponse = function(response, err){
-    if (err){
-        return err;
-    }
-    // todo: will the response or node ever be null?
-    if (response == null || response.node === null || response.node.value === null){
-        return new Error("Key not found");
-    }
-};
-
-var getValue = function(etcdNode){
-    var value = etcdNode.value.toLowerCase();
-    switch(value)
-    {
-        case "true": return true;
-        case "false": return true;
-        default: return null;
-    }
-};
-
-var getOrDefault = function(etcd, applicationName, toggleName, defaultValue, callback){
-    var key = getToggleKey(applicationName, toggleName);
-    etcd.get(key, function(err, response){
-
-        var error = validateResponse(response.node, err);
-        if (error){
-            callback(error, defaultValue);
-            return;
+var getOrDefault = function(cache, toggleName, defaultValue, callback){
+    cache.get(toggleName, function(err, value){
+        if (err){
+            callback(err, defaultValue);
         }
-
-        var value = getValue(response.node);
-        if (value){
+        else {
+            if (value === null){
+                value = defaultValue;
+            }
             callback(null, value);
-        } else {
-            callback(new Error("Invalid value for toggle: " + toggleName), defaultValue);
         }
     });
 };
 
-function Client(applicationName, etcdConfig) {
-
-    var etcdConfig = _.defaults(etcdConfig || {},
-        {
-            host: "127.0.0.1",
-            port: 4001
-        });
-    this.etcd = new Etcd(etcdConfig.host, etcdConfig.port);
-    this.applicationName = applicationName;
-}
-
 Client.prototype.get = function(toggleName, callback){
-    getOrDefault(this.etcd, this.applicationName, toggleName, null, callback);
+    getOrDefault(this.cache, toggleName, null, callback);
 };
 
 Client.prototype.getOrDefault = function(toggleName, defaultValue, callback){
-    getOrDefault(this.etcd, this.applicationName, toggleName, defaultValue, callback);
+    getOrDefault(this.cache, toggleName, defaultValue, callback);
+};
+
+Client.prototype.dispose = function(){
+    this.cache.dispose();
+};
+
+Client.prototype.on = function(eventName, handler){
+    this.eventEmitter.on(eventName, handler);
 };
 
 module.exports = Client;
