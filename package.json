@@ -4,7 +4,7 @@
   "description": "feature toggle client for node",
   "main": "src/Client.js",
   "scripts": {
-    "test": "tests/Clinet.js"
+    "test": "tests/Client.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
     "grunt-mocha-test": "^0.11.0",
     "jshint": "^2.5.2",
     "shelljs": "^0.3.0",
-    "matchdep": "^0.3.0"
+    "matchdep": "^0.3.0",
+    "nock": "^0.42.0"
   }
 }

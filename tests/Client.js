@@ -1,21 +1,84 @@
 var assert = require("assert"),
+    nock = require("nock"),
+    http = require("http"),
     Client = require("../src/Client.js"),
     Etcd = require("node-etcd"),
-    etcd = new Etcd();
+    etcd = new Etcd(),
+    useFakeEtcdResponses = process.env.TRAVIS === "true";
+
+if (useFakeEtcdResponses){
+    console.log("Using fake Etcd responses");
+}
 
 describe("client", function(){
 
-
     beforeEach(function(done){
-        etcd.set('v1/toggles/testApp/onToggle', 'true');
-        etcd.set('v1/toggles/testApp/offToggle', 'false');
-        etcd.set('v1/toggles/testApp/noBoolToggle', 'noABool', function(){
+
+        if (useFakeEtcdResponses) {
+
+            var testAppFeatureToggles = {
+                "action": "get",
+                "node": {
+                    "key": "/v1/toggles/testApp",
+                    "dir": true,
+                    "nodes": [
+                        {
+                            "key": "/v1/toggles/testApp/onToggle",
+                            "value": "true",
+                            "modifiedIndex": 4463,
+                            "createdIndex": 4463
+                        },
+                        {
+                            "key": "/v1/toggles/testApp/offToggle",
+                            "value": "false",
+                            "modifiedIndex": 4464,
+                            "createdIndex": 4464
+                        },
+                        {
+                            "key": "/v1/toggles/testApp/noBoolToggle",
+                            "value": "notABool",
+                            "modifiedIndex": 4465,
+                            "createdIndex": 4465
+                        }
+                    ],
+                    "modifiedIndex": 3,
+                    "createdIndex": 3
+                }};
+
+            nock("http://127.0.0.1:4001")
+                .get("/v2/keys/v1/toggles/testApp?recursive=true")
+                .reply(200, testAppFeatureToggles);
+
+
+            var anotherAppFeatureToggles = {
+                "errorCode": 100,
+                "message": "Key not found",
+                "cause": "/v1/toggles/anotherApp",
+                "index": 4465
+            };
+
+            nock("http://127.0.0.1:4001")
+                .get("/v2/keys/v1/toggles/anotherApp?recursive=true")
+                .reply(404, anotherAppFeatureToggles);
+
             done();
-        });
+
+        } else {
+            etcd.set('v1/toggles/testApp/onToggle', 'true');
+            etcd.set('v1/toggles/testApp/offToggle', 'false');
+            etcd.set('v1/toggles/testApp/noBoolToggle', 'noABool', function(){
+                done();
+            });
+        }
     });
 
+
     afterEach(function(done){
-        etcd.del("v1/toggles/testApp/", { recursive: true }, done);
+        if (!useFakeEtcdResponses) {
+            etcd.del("v1/toggles/testApp/", { recursive: true }, done);
+        } else {
+            done();
+        }
     });
 
     describe("simple get", function(){
@@ -176,7 +239,6 @@ describe("client", function(){
             });
         });
     });
-
 
     describe("many gets", function(){
         var client, cacheUpdatingCount, cacheUpdateCount;
