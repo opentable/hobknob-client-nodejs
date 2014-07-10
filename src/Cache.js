@@ -63,7 +63,7 @@ var parseResponse = function(response){
 var setCache = function(self, value){
     var wasCacheNotInitialized = self.cache === undefined;
     self.cache = value;
-    self.eventEmitter.emit("updated-cache");
+    self.eventEmitter.emit("updated-cache", self);
     if (wasCacheNotInitialized){
         self.eventEmitter.emit("initialized");
     }
@@ -82,7 +82,7 @@ Cache.prototype.get = function(toggle, callback){
 
 Cache.prototype._updateCache = function(){
     var self = this;
-    self.eventEmitter.emit("updating-cache");
+    self.eventEmitter.emit("updating-cache", this);
     self.etcd.get("v1/toggles/" + this.applicationName, { recursive: true }, function(responseError, response){
 
         var noKeysFoundForApplication = responseError && responseError.errorCode === 100;
