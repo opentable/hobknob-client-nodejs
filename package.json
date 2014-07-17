@@ -1,5 +1,5 @@
 {
-  "name": "featuretoggle-client-node",
+  "name": "hobknob-client-nodejs",
   "version": "0.0.3",
   "description": "feature toggle client for node",
   "main": "src/Client.js",
@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/opentable/featuretoggle-client-node.git"
+    "url": "git://github.com/opentable/hobknob-client-nodejs.git"
   },
   "author": "Opentable",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/opentable/featuretoggle-client-node/issues"
+    "url": "https://github.com/opentable/hobknob-client-nodejs/issues"
   },
   "dependencies": {
     "node-etcd": "^2.1.1",
