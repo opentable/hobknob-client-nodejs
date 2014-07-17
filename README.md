@@ -1,21 +1,21 @@
-# featuretoggle-client-node
+# hobknob-client-nodejs
 
 > A node client to retrieve feature toggles stored in Etcd.
 
-[![Build Status](https://travis-ci.org/opentable/featuretoggle-client-node.svg?branch=master)](https://travis-ci.org/opentable/featuretoggle-client-node)
+[![Build Status](https://travis-ci.org/opentable/hobknob-client-nodejs.svg?branch=master)](https://travis-ci.org/opentable/hobknob-client-nodejs)
 
-[![NPM](https://nodei.co/npm/featuretoggle-client-node.png)](https://nodei.co/npm/featuretoggle-client-node)
+[![NPM](https://nodei.co/npm/hobknob-client-nodejs.png)](https://nodei.co/npm/hobknob-client-nodejs)
 
 ## Installation
 
 ```
-npm install featuretoggle-client-node
+npm install hobknob-client-nodejs
 ```
 
 ## Usage
 
 ```javascript
-var Client = require('featuretoggle-client-node');
+var Client = require('hobknob-client-nodejs');
 
 var client = new Client("application-name", {
     etcdHost: "127.0.0.1",
@@ -60,7 +60,7 @@ Feature toggles are stored in Etcd using the following convention:
 Creates a new feature toggle client
 
 ```javascript
-var Client = require("featuretoggle-client-node");
+var Client = require("hobknob-client-nodejs");
 var client = new Client("application-name", { etcdHost: "127.0.0.1" });
 ```
 
