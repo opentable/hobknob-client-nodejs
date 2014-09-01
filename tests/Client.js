@@ -280,6 +280,7 @@ describe("client", function(){
 
         it("cache is updated on a timer", function(done){
             client.on("updated-cache", function(value){
+              assert.equal(value.length, 0);
               done();
             });
         });

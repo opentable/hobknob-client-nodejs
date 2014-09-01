@@ -34,6 +34,13 @@ for(var i = 0; i < toggles.length; i++){
 }
 
 var run = function(){
+
+    setInterval(function(){
+        var i = parseInt(Math.random() * 10) % toggles.length;
+        var val = (Math.random() * 10000) % 2 == 0 ? true : false
+        etcd.set("/v1/toggles/" + toggles[i].appName + "/" + toggles[i].name, val, function(){});
+    }, parseInt(Math.random() * 5000));
+
     setInterval(function(){
         var i = parseInt(Math.random() * 10) % toggles.length;
         var appName = toggles[i].appName;

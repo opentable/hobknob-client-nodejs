@@ -53,9 +53,20 @@ var parseResponse = function(response){
         .value();
 };
 
+var diffs = function(previous, next){
+    var result = [];
+    var union = _.defaults(previous, next);
+    Object.keys(union).forEach(function(k){
+      if(union[k] !== next[k]){
+        result.push({ name: k, old: union[k], new: next[k]});
+      }
+    });
+    return result;
+};
+
 var setCache = function(self, value){
+    self.eventEmitter.emit("updated-cache", diffs(self.cache || {}, value));
     self.cache = value;
-    self.eventEmitter.emit("updated-cache", value);
 };
 
 Cache.prototype.get = function(toggle){
