@@ -3,6 +3,7 @@ var assert = require("assert"),
     http = require("http"),
     Client = require("../src/Client.js"),
     Etcd = require("node-etcd"),
+    should = require("should"),
     etcd = new Etcd(),
     useFakeEtcdResponses = true,
     testAppFeatureToggles;
@@ -88,7 +89,7 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("testApp");
             client.on("error", function(err){
-                assert.fail(err);
+                throw err;
             });
             client.initialise(function(err){
                 done(err);
@@ -101,23 +102,19 @@ describe("client", function(){
         });
 
         it("should get a true value for an existing key", function(){
-            var value = client.get('onToggle');
-            assert.equal(value, true);
+            client.get('onToggle').should.be.true;
         });
 
         it("should get a false value for an existing key", function(){
-            var value = client.get('offToggle');
-            assert.equal(value, false);
+            client.get('offToggle').should.be.false;
         });
 
         it("should return null for a non-existing key", function(){
-            var value = client.get('noToggle');
-            assert.equal(value, null);
+            should.not.exist(client.get('noToggle'));
         });
 
         it("should return null for a non-bool value", function(){
-            var value = client.get('noBoolToggle')
-            assert.equal(value, null);
+            should.not.exist(client.get('noBoolToggle'));
         });
     });
 
@@ -127,7 +124,7 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("testApp");
             client.on("error", function(err){
-                assert.fail(err);
+                throw err;
             });
             client.initialise(function(err){
                 done(err);
@@ -140,23 +137,19 @@ describe("client", function(){
         });
 
         it("should get a true value for an existing key", function(){
-            var value = client.getOrDefault('onToggle', false);
-            assert.equal(value, true);
+            client.getOrDefault('onToggle', false).should.be.true;
         });
 
         it("should get a false value for an existing key", function(){
-            var value = client.getOrDefault('offToggle', true);
-            assert.equal(value, false);
+            client.getOrDefault('offToggle', true).should.be.false;
         });
 
         it("should return a default for a non-existing key", function(){
-            var value = client.getOrDefault('noToggle', true);
-            assert.equal(value, true);
+            client.getOrDefault('noToggle', true).should.be.true;
         });
 
         it("should return a default for a non-bool value", function(){
-            var value = client.getOrDefault('noBoolToggle', true);
-            assert.equal(value, true);
+            client.getOrDefault('noBoolToggle', true).should.be.true;
         });
     });
 
@@ -166,7 +159,7 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("anotherApp");
             client.on("error", function(err){
-                assert.fail(err);
+                throw err;
             });
             client.initialise(function(err){
                 done(err);
@@ -179,8 +172,7 @@ describe("client", function(){
         });
 
         it("should not fail when updating the cache", function(){
-            var value = client.get('toggle');
-            assert.equal(value, null, "value should be null");
+            should.not.exist(client.get('toggle'));
         });
     });
 
@@ -190,7 +182,7 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("testApp", { etcdPort: 123456 });
             client.on("error", function(err){
-              assert.fail(err);
+              throw err;
             });
             client.initialise(function(err){
               caughtError = true;
@@ -204,12 +196,12 @@ describe("client", function(){
         });
 
         it("should emit an error when initializing", function(){
-            assert.equal(caughtError, true);
+            caughtError.should.be.true;
         });
 
         it("should return an error when getting a toggle", function(done){
             try {
-              var value = client.get('toggle');
+              client.get('toggle');
             }
             catch(exception){
               done(!exception ? new Error("expecting an error when cache initialisation failed") : undefined);
@@ -235,7 +227,7 @@ describe("client", function(){
         it("should get the same value for the same key if called twice", function(){
             var val1 = client.get('onToggle');
             var val2 = client.get('onToggle');
-            assert.equal(val1, val2);
+            val1.should.equal(val2);
         });
 
         it("should perform well once data is cached", function(){
@@ -246,7 +238,7 @@ describe("client", function(){
             }
             var duration = process.hrtime(start);
             var timeTaken = (duration[0]*1000) + (duration[1]/1000);
-            assert(timeTaken < 2000, "Required < 2000ms, got " + timeTaken + "ms");
+            timeTaken.should.be.lessThan(2000);
         });
     });
 
@@ -258,7 +250,7 @@ describe("client", function(){
             client = new Client("testApp", {cacheIntervalMs: 1000});
 
             client.on("error", function(err){
-              assert.fail(err);
+              throw err;
             });
 
             client.initialise(function(err){
@@ -280,7 +272,7 @@ describe("client", function(){
 
         it("cache is updated on a timer", function(done){
             client.on("updated-cache", function(value){
-              assert.equal(value.length, 0);
+              value.should.eql([]);
               done();
             });
         });
