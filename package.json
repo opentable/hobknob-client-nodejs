@@ -28,7 +28,6 @@
     "grunt-mocha-test": "^0.11.0",
     "jshint": "^2.5.2",
     "shelljs": "^0.3.0",
-    "matchdep": "^0.3.0",
     "nock": "^0.42.0"
   }
 }
