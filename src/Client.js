@@ -18,8 +18,8 @@ var getOrDefault = function(cache, toggleName, defaultValue){
 };
 
 Client.prototype.initialise = function(callback){
-  var self = this;
-  self.cache.initialise(callback);
+    var self = this;
+    self.cache.initialise(callback);
 };
 
 Client.prototype.get = function(toggleName){
