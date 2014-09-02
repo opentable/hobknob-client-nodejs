@@ -3,6 +3,7 @@ var assert = require("assert"),
     http = require("http"),
     Client = require("../src/Client.js"),
     Etcd = require("node-etcd"),
+    should = require("should"),
     etcd = new Etcd(),
     useFakeEtcdResponses = true,
     testAppFeatureToggles;
@@ -88,10 +89,10 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("testApp");
             client.on("error", function(err){
-                assert.fail(err);
+                throw err;
             });
-            client.on("initialized", function(){
-                done();
+            client.initialise(function(err){
+                done(err);
             });
         });
 
@@ -100,36 +101,20 @@ describe("client", function(){
             client = null;
         });
 
-        it("should get a true value for an existing key", function(done){
-            client.get('onToggle', function(err, value){
-                assert.equal(value, true);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should get a true value for an existing key", function(){
+            client.get('onToggle').should.be.true;
         });
 
-        it("should get a false value for an existing key", function(done){
-            client.get('offToggle', function(err, value){
-                assert.equal(value, false);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should get a false value for an existing key", function(){
+            client.get('offToggle').should.be.false;
         });
 
-        it("should return null for a non-existing key", function(done){
-            client.get('noToggle', function(err, value){
-                assert.equal(value, null);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should return null for a non-existing key", function(){
+            should.not.exist(client.get('noToggle'));
         });
 
-        it("should return null for a non-bool value", function(done){
-            client.get('noBoolToggle', function(err, value){
-                assert.equal(value, null);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should return null for a non-bool value", function(){
+            should.not.exist(client.get('noBoolToggle'));
         });
     });
 
@@ -139,10 +124,10 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("testApp");
             client.on("error", function(err){
-                assert.fail(err);
+                throw err;
             });
-            client.on("initialized", function(){
-                done();
+            client.initialise(function(err){
+                done(err);
             });
         });
 
@@ -151,36 +136,20 @@ describe("client", function(){
             client = null;
         });
 
-        it("should get a true value for an existing key", function(done){
-            client.getOrDefault('onToggle', false, function(err, value){
-                assert.equal(value, true);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should get a true value for an existing key", function(){
+            client.getOrDefault('onToggle', false).should.be.true;
         });
 
-        it("should get a false value for an existing key", function(done){
-            client.getOrDefault('offToggle', true, function(err, value){
-                assert.equal(value, false);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should get a false value for an existing key", function(){
+            client.getOrDefault('offToggle', true).should.be.false;
         });
 
-        it("should return a default for a non-existing key", function(done){
-            client.getOrDefault('noToggle', true, function(err, value){
-                assert.equal(value, true);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should return a default for a non-existing key", function(){
+            client.getOrDefault('noToggle', true).should.be.true;
         });
 
-        it("should return a default for a non-bool value", function(done){
-            client.getOrDefault('noBoolToggle', true, function(err, value){
-                assert.equal(value, true);
-                assert.equal(err, null,"err should be null");
-                done();
-            });
+        it("should return a default for a non-bool value", function(){
+            client.getOrDefault('noBoolToggle', true).should.be.true;
         });
     });
 
@@ -190,10 +159,10 @@ describe("client", function(){
         beforeEach(function(done){
             client = new Client("anotherApp");
             client.on("error", function(err){
-                assert.fail(err);
+                throw err;
             });
-            client.on("initialized", function(){
-                done();
+            client.initialise(function(err){
+                done(err);
             });
         });
 
@@ -202,22 +171,22 @@ describe("client", function(){
             client = null;
         });
 
-        it("should no fail when updating the cache", function(done){
-            client.get('toggle', function(err, value){
-                assert.equal(err, null, "err should be null");
-                assert.equal(value, null, "value should be null");
-                done();
-            });
+        it("should not fail when updating the cache", function(){
+            should.not.exist(client.get('toggle'));
         });
     });
 
     describe("etcd instance is down", function() {
         var client, caughtError;
 
-        beforeEach(function(){
+        beforeEach(function(done){
             client = new Client("testApp", { etcdPort: 123456 });
-            client.on("error", function(){
-                caughtError = true;
+            client.on("error", function(err){
+              throw err;
+            });
+            client.initialise(function(err){
+              caughtError = true;
+              done();
             });
         });
 
@@ -227,17 +196,16 @@ describe("client", function(){
         });
 
         it("should emit an error when initializing", function(){
-            setTimeout(function() {
-                assert.equal(caughtError, true);
-            }, 200);
+            caughtError.should.be.true;
         });
 
         it("should return an error when getting a toggle", function(done){
-            client.get('toggle', function(err, value){
-                assert.notEqual(err, null, "err should be not null");
-                assert.equal(value, null, "value should be null");
-                done();
-            });
+            try {
+              client.get('toggle');
+            }
+            catch(exception){
+              done(!exception ? new Error("expecting an error when cache initialisation failed") : undefined);
+            }
         });
     });
 
@@ -246,17 +214,9 @@ describe("client", function(){
 
         beforeEach(function(done){
             client = new Client("testApp");
-            client.on("updating-cache", function(){
-                cacheUpdatingCount++;
+            client.initialise(function(err){
+                done(err);
             });
-            client.on("updating-cache", function(){
-                cacheUpdateCount++;
-            });
-            client.on("initialized", function(){
-                done();
-            });
-            cacheUpdatingCount = 0;
-            cacheUpdateCount = 0;
         });
 
         afterEach(function(){
@@ -264,32 +224,21 @@ describe("client", function(){
             client = null;
         });
 
-        it("should get the same value for the same key if called twice", function(done){
-            client.get('onToggle', function(err1, value1){
-                client.get('onToggle', function(err2, value2){
-                    assert.equal(value1, value2);
-                    done();
-                });
-            });
+        it("should get the same value for the same key if called twice", function(){
+            var val1 = client.get('onToggle');
+            var val2 = client.get('onToggle');
+            val1.should.equal(val2);
         });
 
-        it("should perform well once data is cached", function(done){
+        it("should perform well once data is cached", function(){
             var updates = 0, startTime = 0, endTime = 0, runs = 10000;
+            var start = process.hrtime();
             for(var i = 0; i < runs; i++){
-                client.get('onToggle', function(err, value){
-                    if (updates === 0){
-                        startTime = new Date().getTime();
-                    }
-                    updates++;
-                    if (updates == runs){
-                        endTime = new Date().getTime();
-                        var timeTaken = endTime - startTime;
-                        console.log("Time taken: " + timeTaken + "ms")
-                        assert(timeTaken < 200, "Required < 200ms, got " + timeTaken + "ms");
-                        done();
-                    }
-                });
+                client.get('onToggle');
             }
+            var duration = process.hrtime(start);
+            var timeTaken = (duration[0]*1000) + (duration[1]/1000);
+            timeTaken.should.be.lessThan(2000);
         });
     });
 
@@ -297,21 +246,23 @@ describe("client", function(){
         var client, cacheUpdateCount;
 
         beforeEach(function(done){
+            cacheUpdateCount = 0;
             client = new Client("testApp", {cacheIntervalMs: 1000});
-            client.on("updating-cache", function(){
-                cacheUpdateCount++;
-            });
-            client.on("initialized", function(){
 
+            client.on("error", function(err){
+              throw err;
+            });
+
+            client.initialise(function(err){
                 if (useFakeEtcdResponses) {
                     // need to re-intercept this call, as nock removes intercepts after being called once
                     nock("http://127.0.0.1:4001")
                         .get("/v2/keys/v1/toggles/testApp?recursive=true")
                         .reply(200, testAppFeatureToggles);
                 }
-                done();
+                done(err);
             });
-            cacheUpdateCount = 0;
+
         });
 
         afterEach(function(){
@@ -319,25 +270,11 @@ describe("client", function(){
             client = null;
         });
 
-        it("cache is not updated on a client get", function(done){
-            var updates = 0;
-            for(var i = 0; i < 10; i++){
-                client.get('onToggle', function(err, value){
-                    updates++;
-                });
-            }
-            setTimeout(function(){
-                assert(updates > 1, "Should have retrieved the toggle value more than once");
-                assert.equal(cacheUpdateCount, 0, "Cache should have been updated only during initialisation");
-                done();
-            }, 100);
-        });
-
         it("cache is updated on a timer", function(done){
-            setTimeout(function(){
-                assert.equal(cacheUpdateCount, 1, "Cache should have been updated once since initialisation");
-                done();
-            }, 1100);
+            client.on("updated-cache", function(value){
+              value.should.eql([]);
+              done();
+            });
         });
     });
 });

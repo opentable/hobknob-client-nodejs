@@ -4,7 +4,7 @@ var Etcd = require("node-etcd"),
     toggles = [
         {appName: "app1", name: "toggle1", cacheIntervalMs: 1000},
         {appName: "app2", name: "toggle2", cacheIntervalMs: 2000},
-        {appName: "app3", name: "toggle3", cacheIntervalMs: 1000}
+        {appName: "app3", name: "toggle3", cacheIntervalMs: 3000}
     ],
     clients = [],
     clientInitializedCount = 0,
@@ -21,10 +21,10 @@ for(var i = 0; i < toggles.length; i++){
     client.on("error", function(err){
         console.log(err);
     });
-    client.on("updated-cache", function(sender){
-        console.log("Updated cache, app name: " + sender.applicationName);
+    client.on("updated-cache", function(value){
+        console.log("Updated cache: " + JSON.stringify(value));
     });
-    client.on("initialized", function(){
+    client.initialise(function(err){
         clientInitializedCount++;
         if (clientInitializedCount == toggles.length){
             run();
@@ -34,17 +34,18 @@ for(var i = 0; i < toggles.length; i++){
 }
 
 var run = function(){
+
     setInterval(function(){
-        for(var i = 0; i < toggles.length; i++) {
-            var appName = toggles[i].appName;
-            var name = toggles[i].name;
-            clients[i].get(name, function(err, value){
-                if (err){
-                    console.log(appName + "/" + name + " - ERROR: " + err);
-                } else {
-                    console.log(appName + "/" + name + ": " + value);
-                }
-            });
-        }
-    }, 1000);
+        var i = parseInt(Math.random() * 10) % toggles.length;
+        var val = (Math.random() * 10000) % 2 == 0 ? true : false
+        etcd.set("/v1/toggles/" + toggles[i].appName + "/" + toggles[i].name, val, function(){});
+    }, parseInt(Math.random() * 5000));
+
+    setInterval(function(){
+        var i = parseInt(Math.random() * 10) % toggles.length;
+        var appName = toggles[i].appName;
+        var name = toggles[i].name;
+        var value = clients[i].get(name);
+        console.log(appName + "/" + name + ": " + value);
+    }, parseInt(Math.random() * 3000));
 };

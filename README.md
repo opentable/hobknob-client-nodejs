@@ -27,16 +27,19 @@ client.on("error", function(err) {
     console.log(err);
 });
 
-client.on("initialized", function() {
-    
-    client.get("toggle1", function(err, value) {
-        console.log(value);
-    });
-    
-    client.getOrDefault("toggle2", true, function(err, value) {
-        console.log(value);
-    });
+client.on("updated-cache", function(togglesChanged){
+    console.log('updated-cache' + JSON.stringify(togglesChanged)); // contains an array of toggles that changed in the last update
+});
 
+client.initialise(function(err) {
+
+    if(err){
+        throw err;
+    }
+
+    console.log(client.get("toggle1"));
+
+    console.log(client.getOrDefault("toggle2", true));
 });
 ```
 
@@ -72,25 +75,35 @@ var client = new Client("application-name", { etcdHost: "127.0.0.1" });
 
 ### .on(eventName, callback)
 
-Subscribs to events emitted by the client. 
+Subscribes to events emitted by the client.
 
-- `error` [required]
-- `initialized`
-- `updating-cache`
-- `updated-cache`
+- `error: function(err){ }` // required, will return a javascript error object
+- `updated-cache: function(togglesChanged){ }` // optional, will return a list of toggles that changed in the last update
 
-### .get(toggleName, callback)
+example:
+
+```javascript
+client.on('updated-cache', function(toggles){
+  console.log(toggles);
+});
+
+// output
+
+[
+  { name: 'mytoggle', old: false, new: true },
+  ...
+]
+```
+
+### .get(toggleName)
 
 Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return `null`
 
 - `toggleName` the name of the toggle, used with the application name to get the feature toggle value
-- `callback` function with parameters (`err`, `value`)
 
-
-### .getOrDefault(toggleName, defaultValue, callback)
+### .getOrDefault(toggleName, defaultValue)
 
 Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return the default value (`true` or `false`)
 
 - `toggleName` the name of the toggle, used with the application name to get the feature toggle value
 - `defaultValue` the value to return if the toggle value is not found or if there is an error
-- `callback` function with parameters (`err`, `value`)
