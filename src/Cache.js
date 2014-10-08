@@ -72,7 +72,8 @@ var setCache = function(self, value){
 Cache.prototype.get = function(toggle){
     var self = this;
     if (!self.cache){
-        throw new Error("Cache not initialized");
+        self.eventEmitter.emit("error", new Error("Cache not initialized. Tried to read toggle: " + toggle));
+        return null;
     }
 
     var value = self.cache[toggle];
