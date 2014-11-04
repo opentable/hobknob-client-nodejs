@@ -83,41 +83,6 @@ describe("client", function(){
         }
     });
 
-    describe("simple get", function(){
-        var client;
-
-        beforeEach(function(done){
-            client = new Client("testApp");
-            client.on("error", function(err){
-                throw err;
-            });
-            client.initialise(function(err){
-                done(err);
-            });
-        });
-
-        afterEach(function(){
-            client.dispose();
-            client = null;
-        });
-
-        it("should get a true value for an existing key", function(){
-            client.get('onToggle').should.be.true;
-        });
-
-        it("should get a false value for an existing key", function(){
-            client.get('offToggle').should.be.false;
-        });
-
-        it("should return null for a non-existing key", function(){
-            should.not.exist(client.get('noToggle'));
-        });
-
-        it("should return null for a non-bool value", function(){
-            should.not.exist(client.get('noBoolToggle'));
-        });
-    });
-
     describe("simple get or default", function(){
         var client;
 
@@ -172,7 +137,7 @@ describe("client", function(){
         });
 
         it("should not fail when updating the cache", function(){
-            should.not.exist(client.get('toggle'));
+            client.getOrDefault('toggle', true).should.be.true;
         });
     });
 
@@ -225,8 +190,8 @@ describe("client", function(){
         });
 
         it("should get the same value for the same key if called twice", function(){
-            var val1 = client.get('onToggle');
-            var val2 = client.get('onToggle');
+            var val1 = client.getOrDefault('onToggle', false);
+            var val2 = client.getOrDefault('onToggle', false);
             val1.should.equal(val2);
         });
 
@@ -234,7 +199,7 @@ describe("client", function(){
             var updates = 0, startTime = 0, endTime = 0, runs = 10000;
             var start = process.hrtime();
             for(var i = 0; i < runs; i++){
-                client.get('onToggle');
+                client.getOrDefault('onToggle', false);
             }
             var duration = process.hrtime(start);
             var timeTaken = (duration[0]*1000) + (duration[1]/1000);

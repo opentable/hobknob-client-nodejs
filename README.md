@@ -37,8 +37,6 @@ client.initialise(function(err) {
         throw err;
     }
 
-    console.log(client.get("toggle1"));
-
     console.log(client.getOrDefault("toggle2", true));
 });
 ```
@@ -94,12 +92,6 @@ client.on('updated-cache', function(toggles){
   ...
 ]
 ```
-
-### .get(toggleName)
-
-Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return `null`
-
-- `toggleName` the name of the toggle, used with the application name to get the feature toggle value
 
 ### .getOrDefault(toggleName, defaultValue)
 
