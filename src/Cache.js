@@ -41,7 +41,7 @@ var parseValue = function(value){
 
 var parseResponse = function(response){
     return _.chain(response.node.nodes || [])
-        .where(function (item) {
+        .filter(function (item) {
             return item.value !== undefined;
         })
         .map(function (item) {
