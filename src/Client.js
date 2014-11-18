@@ -31,16 +31,11 @@ Client.prototype.getOrDefault = function(toggleName){
         secondaryKey = null,
         defaultValue;
 
-    switch(args.length){
-        case 2:
-            defaultValue = args[1];
-            break;
-        case 3:
-            secondaryKey = args[1];
-            defaultValue = args[2];
-            break;
-        default:
-            throw new Error("getOrDefault should provide 2 or 3 arguments: (toggleName, defaultValue) or (toggleName, secondaryKey, defaultValue)");
+    if (args.length === 2){
+        defaultValue = args[1];
+    } else {
+        secondaryKey = args[1];
+        defaultValue = args[2];
     }
 
     return getOrDefault(this.cache, toggleName, secondaryKey, defaultValue);
