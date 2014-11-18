@@ -39,16 +39,31 @@ var parseValue = function(value){
     }
 };
 
+var getSecondaryKeyValuePairs = function(featureNode, featureName){
+    var metaDataKey = featureNode.key + "/@meta";
+    return _.chain(featureNode.nodes)
+        .filter(function(n) { return n.key !== metaDataKey; })
+        .map(function(n){
+            var featureAndSecondaryKey = featureName + "/" + _.last(n.key.split("/"));
+            return [featureAndSecondaryKey, parseValue(n.value)];
+        })
+        .value();
+};
+
 var parseResponse = function(response){
     return _.chain(response.node.nodes || [])
-        .filter(function (item) {
-            return item.value !== undefined;
-        })
         .map(function (item) {
-            var key = _.last(item.key.split("/"));
-            var value = parseValue(item.value);
-            return [key, value];
+            var featureName = _.last(item.key.split("/"));
+            if (item.dir){
+                return getSecondaryKeyValuePairs(item, featureName);
+            } else {
+                if (item.value === undefined) {
+                    return [];
+                }
+                return [[featureName, parseValue(item.value)]];
+            }
         })
+        .flatten(true)
         .object()
         .value();
 };
@@ -69,14 +84,15 @@ var setCache = function(self, value){
     self.cache = value;
 };
 
-Cache.prototype.get = function(toggle){
+Cache.prototype.get = function(toggle, secondaryKey){
     var self = this;
     if (!self.cache){
         self.eventEmitter.emit("error", new Error("Cache not initialized. Tried to read toggle: " + toggle));
         return null;
     }
 
-    var value = self.cache[toggle];
+    var key = secondaryKey ? toggle + "/" + secondaryKey : toggle;
+    var value = self.cache[key];
     return value === undefined ? null : value;
 };
 

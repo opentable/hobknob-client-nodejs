@@ -7,8 +7,8 @@ function Client(applicationName, config) {
     this.cache = new Cache(applicationName, config, this.eventEmitter);
 }
 
-var getOrDefault = function(cache, toggleName, defaultValue){
-    var value = cache.get(toggleName);
+var getOrDefault = function(cache, toggleName, secondaryKey, defaultValue){
+    var value = cache.get(toggleName, secondaryKey);
 
     if (value === null){
         value = defaultValue;
@@ -22,12 +22,23 @@ Client.prototype.initialise = function(callback){
     self.cache.initialise(callback);
 };
 
-Client.prototype.get = function(toggleName){
-    return getOrDefault(this.cache, toggleName, null);
+Client.prototype.get = function(toggleName, secondaryKey){
+    return getOrDefault(this.cache, toggleName, secondaryKey ? secondaryKey : null, null);
 };
 
-Client.prototype.getOrDefault = function(toggleName, defaultValue){
-    return getOrDefault(this.cache, toggleName, defaultValue);
+Client.prototype.getOrDefault = function(toggleName){
+    var args = arguments,
+        secondaryKey = null,
+        defaultValue;
+
+    if (args.length === 2){
+        defaultValue = args[1];
+    } else {
+        secondaryKey = args[1];
+        defaultValue = args[2];
+    }
+
+    return getOrDefault(this.cache, toggleName, secondaryKey, defaultValue);
 };
 
 Client.prototype.dispose = function(){

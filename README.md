@@ -77,33 +77,45 @@ var client = new Client("application-name", { etcdHost: "127.0.0.1" });
 
 Subscribes to events emitted by the client.
 
-- `error: function(err){ }` // required, will return a javascript error object
-- `updated-cache: function(togglesChanged){ }` // optional, will return a list of toggles that changed in the last update
+- `eventName` - name of the event to listen to (see below for possible event names)
+- `callback` - callback that is called with different arguments per event when the event is fired (see below for event callbacks)
+
+Events:
+- `error` -  function(err){ }` // required, will return a javascript error object
+- `updated-cache` - function(togglesChanged){ }` // optional, will return a list of toggles that changed in the last update
 
 example:
-
 ```javascript
 client.on('updated-cache', function(toggles){
   console.log(toggles);
 });
 
 // output
-
 [
   { name: 'mytoggle', old: false, new: true },
   ...
 ]
 ```
 
-### .get(toggleName)
+### .get(toggleName, [secondaryKey])
 
-Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return `null`
+Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return `null`.
 
-- `toggleName` the name of the toggle, used with the application name to get the feature toggle value
+```javascript
+var isFeatureToggle1Enabled = client.get('featureToggle1');
+```
 
-### .getOrDefault(toggleName, defaultValue)
+- `toggleName` - the name of the toggle, used with the application name to get the feature toggle value
+- `secondaryKey` - used when accessing a multi feature-toggle (e.g. `get('domainFeature', 'com')`)
+
+### .getOrDefault(toggleName, [secondaryKey], defaultValue)
 
 Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return the default value (`true` or `false`)
 
-- `toggleName` the name of the toggle, used with the application name to get the feature toggle value
-- `defaultValue` the value to return if the toggle value is not found or if there is an error
+```javascript
+var isFeatureToggle1Enabled = client.getOrDefault('featureToggle1', false);
+```
+
+- `toggleName` - the name of the toggle, used with the application name to get the feature toggle value
+- `secondaryKey` - [optional] used when accessing a multi feature-toggle (e.g. `client.getOrDefault('domainFeature', 'com', false)`)
+- `defaultValue` - the value to return if the toggle value is not found or if there is an error

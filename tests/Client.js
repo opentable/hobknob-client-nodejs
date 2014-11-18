@@ -41,6 +41,32 @@ describe("client", function(){
                             "value": "notABool",
                             "modifiedIndex": 4465,
                             "createdIndex": 4465
+                        },
+                        {
+                            "key": "/v1/toggles/testApp/multiFeature",
+                            "dir": true,
+                            "modifiedIndex": 4465,
+                            "createdIndex": 4465,
+                            "nodes": [
+                                {
+                                    "key": "/v1/toggles/testApp/multiFeature/@meta",
+                                    "value": "{\"categoryId\":2}",
+                                    "modifiedIndex": 6308,
+                                    "createdIndex": 6308
+                                },
+                                {
+                                    "key": "/v1/toggles/testApp/multiFeature/en-GB",
+                                    "value": "true",
+                                    "modifiedIndex": 6316,
+                                    "createdIndex": 6316
+                                },
+                                {
+                                    "key": "/v1/toggles/testApp/multiFeature/en-US",
+                                    "value": "true",
+                                    "modifiedIndex": 6318,
+                                    "createdIndex": 6318
+                                }
+                            ]
                         }
                     ],
                     "modifiedIndex": 3,
@@ -116,6 +142,14 @@ describe("client", function(){
         it("should return null for a non-bool value", function(){
             should.not.exist(client.get('noBoolToggle'));
         });
+
+        it("should return null for a multi feature toggle when not passing secondary key", function(){
+            should.not.exist(client.get('multiFeature'));
+        });
+
+        it("should return the value of a multi feature toggle", function(){
+            should.exist(client.get("multiFeature", "en-GB"));
+        });
     });
 
     describe("simple get or default", function(){
@@ -150,6 +184,18 @@ describe("client", function(){
 
         it("should return a default for a non-bool value", function(){
             client.getOrDefault('noBoolToggle', true).should.be.true;
+        });
+
+        it("should return the default when secondary key is not present when getting a multi feature toggle", function(){
+            client.getOrDefault('multiFeature', true).should.be.true;
+        });
+        
+        it("should return the correct value for a multi feature toggle", function(){
+            client.getOrDefault('multiFeature', 'en-GB', false).should.be.true;
+        });
+
+        it("should return the default value for a multi feature toggle with a secondary key that is not present in etcd", function(){
+            client.getOrDefault('multiFeature', 'monkey', true).should.be.true;
         });
     });
 
