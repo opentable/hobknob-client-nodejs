@@ -135,5 +135,3 @@ features.should.be.eql({
 });
 
 ```
-
-
