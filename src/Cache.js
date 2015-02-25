@@ -85,15 +85,22 @@ var setCache = function(self, value){
 };
 
 Cache.prototype.get = function(toggle, secondaryKey){
-    var self = this;
-    if (!self.cache){
-        self.eventEmitter.emit("error", new Error("Cache not initialized. Tried to read toggle: " + toggle));
+    if (!this.cache){
+        this.eventEmitter.emit("error", new Error("Cache not initialized. Tried to read toggle: " + toggle));
         return null;
     }
 
     var key = secondaryKey ? toggle + "/" + secondaryKey : toggle;
-    var value = self.cache[key];
+    var value = this.cache[key];
     return value === undefined ? null : value;
+};
+
+Cache.prototype.getAll = function() {
+    if (!this.cache){
+        this.eventEmitter.emit("error", new Error("Cache not initialized."));
+        return null;
+    }
+    return this.cache;
 };
 
 Cache.prototype.initialise = function(callback){

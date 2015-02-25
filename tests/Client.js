@@ -77,6 +77,20 @@ describe("client", function(){
                 .get("/v2/keys/v1/toggles/testApp?recursive=true")
                 .reply(200, testAppFeatureToggles);
 
+            emptyAppFeatureToggles = {
+                "action": "get",
+                "node": {
+                    "key": "/v1/toggles/emptyApp",
+                    "dir": true,
+                    "nodes": [],
+                    "modifiedIndex": 3,
+                    "createdIndex": 3
+                }};
+
+            nock("http://127.0.0.1:4001")
+                .get("/v2/keys/v1/toggles/emptyApp?recursive=true")
+                .reply(200, emptyAppFeatureToggles);
+
 
             var anotherAppFeatureToggles = {
                 "errorCode": 100,
@@ -197,6 +211,48 @@ describe("client", function(){
         it("should return the default value for a multi feature toggle with a secondary key that is not present in etcd", function(){
             client.getOrDefault('multiFeature', 'monkey', true).should.be.true;
         });
+    });
+
+    describe("get all", function() {
+        var client;
+
+        beforeEach(function(done){
+            client = new Client("emptyApp");
+            client.on("error", function(err){
+                throw err;
+            });
+            client.initialise(function(err){
+                done(err);
+            });
+        });
+
+        afterEach(function(){
+            client.dispose();
+            client = null;
+        });
+
+        it("it should return all key value pairs for an application", function(){
+            var expected = {
+                "onToggle": true,
+                "offToggle": false,
+                "multiFeature/en-GB": true,
+                "multiFeature/en-US": true,
+                "noBoolToggle": null
+            };
+            client.getAll().should.be.eql(expected);
+        });
+
+        it("it should return an empty object for an application that does not have any keys", function(){
+            var expectedEmpty = {
+            };
+            client.getAll().should.be.eql(expectedEmpty);
+        });
+
+        it("it should return a null value for an application that does not exist", function(){
+            var expectedNull = null;
+            client.getAll().should.be.eql(expectedNull);
+        });
+
     });
 
     describe("application does not have any feature toggles set", function() {
