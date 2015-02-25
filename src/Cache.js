@@ -100,7 +100,7 @@ Cache.prototype.getAll = function() {
         this.eventEmitter.emit("error", new Error("Cache not initialized."));
         return null;
     }
-    return this.cache;
+    return _.clone(this.cache);
 };
 
 Cache.prototype.initialise = function(callback){

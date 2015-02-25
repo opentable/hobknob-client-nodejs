@@ -243,6 +243,25 @@ describe("client", function(){
             });
         });
 
+        it("should return a different object to the client cache object", function(done){
+            buildClient("testApp", function(client){
+
+                var allFeatures = client.getAll();
+                delete allFeatures["onToggle"];
+                allFeatures.Monkey = "Bananas";
+
+                var expected = {
+                    "onToggle": true,
+                    "offToggle": false,
+                    "multiFeature/en-GB": true,
+                    "multiFeature/en-US": true,
+                    "noBoolToggle": null
+                };
+                client.getAll().should.be.eql(expected);
+                done();
+            });
+        });
+
         it("should return an empty object for an application that does not have any keys", function(done){
             buildClient("emptyApp", function(client){
                 client.getAll().should.be.empty;
