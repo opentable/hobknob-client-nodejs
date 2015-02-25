@@ -122,8 +122,18 @@ var isFeatureToggle1Enabled = client.getOrDefault('featureToggle1', false);
 
 ### .getAll()
 
-Gets the value of all features
+Gets the values for all features for the application.
 
 ```javascript
-var isFeatureToggle1Enabled = client.getAll();
+var features = client.getAll();
+
+features.should.be.eql({
+  "feature1": "true",
+  "feature2": "false",
+  "domFeature/com": "true",
+  "domFeature/couk": "false"
+});
+
 ```
+
+
