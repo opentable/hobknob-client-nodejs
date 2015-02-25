@@ -119,3 +119,19 @@ var isFeatureToggle1Enabled = client.getOrDefault('featureToggle1', false);
 - `toggleName` - the name of the toggle, used with the application name to get the feature toggle value
 - `secondaryKey` - [optional] used when accessing a multi feature-toggle (e.g. `client.getOrDefault('domainFeature', 'com', false)`)
 - `defaultValue` - the value to return if the toggle value is not found or if there is an error
+
+### .getAll()
+
+Gets the values for all features for the application.
+
+```javascript
+var features = client.getAll();
+
+features.should.be.eql({
+  "feature1": "true",
+  "feature2": "false",
+  "domFeature/com": "true",
+  "domFeature/couk": "false"
+});
+
+```

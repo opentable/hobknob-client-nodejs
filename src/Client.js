@@ -7,7 +7,7 @@ function Client(applicationName, config) {
     this.cache = new Cache(applicationName, config, this.eventEmitter);
 }
 
-var getOrDefault = function(cache, toggleName, secondaryKey, defaultValue){
+var _getOrDefault = function(cache, toggleName, secondaryKey, defaultValue){
     var value = cache.get(toggleName, secondaryKey);
 
     if (value === null){
@@ -23,11 +23,12 @@ Client.prototype.initialise = function(callback){
 };
 
 Client.prototype.get = function(toggleName, secondaryKey){
-    return getOrDefault(this.cache, toggleName, secondaryKey ? secondaryKey : null, null);
+    return _getOrDefault(this.cache, toggleName, secondaryKey ? secondaryKey : null, null);
 };
 
-Client.prototype.getOrDefault = function(toggleName){
+Client.prototype.getOrDefault = function(){
     var args = arguments,
+        toggleName = args[0],
         secondaryKey = null,
         defaultValue;
 
@@ -38,7 +39,11 @@ Client.prototype.getOrDefault = function(toggleName){
         defaultValue = args[2];
     }
 
-    return getOrDefault(this.cache, toggleName, secondaryKey, defaultValue);
+    return _getOrDefault(this.cache, toggleName, secondaryKey, defaultValue);
+};
+
+Client.prototype.getAll = function() {
+    return this.cache.getAll();
 };
 
 Client.prototype.dispose = function(){
