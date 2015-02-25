@@ -92,16 +92,16 @@ describe("client", function(){
                 .reply(200, emptyAppFeatureToggles);
 
 
-            var anotherAppFeatureToggles = {
+            var nonExistantAppFeatureToggles = {
                 "errorCode": 100,
                 "message": "Key not found",
-                "cause": "/v1/toggles/anotherApp",
+                "cause": "/v1/toggles/nonExistantApp",
                 "index": 4465
             };
 
             nock("http://127.0.0.1:4001")
-                .get("/v2/keys/v1/toggles/anotherApp?recursive=true")
-                .reply(404, anotherAppFeatureToggles);
+                .get("/v2/keys/v1/toggles/nonExistantApp?recursive=true")
+                .reply(404, nonExistantAppFeatureToggles);
 
             done();
 
@@ -214,43 +214,47 @@ describe("client", function(){
     });
 
     describe("get all", function() {
-        var client;
 
-        beforeEach(function(done){
-            client = new Client("emptyApp");
+        var buildClient = function(applicationName, cb){
+            var client = new Client(applicationName);
             client.on("error", function(err){
                 throw err;
             });
             client.initialise(function(err){
-                done(err);
+                if (err) {
+                    throw err;
+                }
+                cb(client);
+                client.dispose();
+            });
+        };
+
+        it("should return all key value pairs for an application", function(done){
+            buildClient("testApp", function(client){
+                var expected = {
+                    "onToggle": true,
+                    "offToggle": false,
+                    "multiFeature/en-GB": true,
+                    "multiFeature/en-US": true,
+                    "noBoolToggle": null
+                };
+                client.getAll().should.be.eql(expected);
+                done();
             });
         });
 
-        afterEach(function(){
-            client.dispose();
-            client = null;
+        it("should return an empty object for an application that does not have any keys", function(done){
+            buildClient("emptyApp", function(client){
+                client.getAll().should.be.empty;
+                done();
+            });
         });
 
-        it("it should return all key value pairs for an application", function(){
-            var expected = {
-                "onToggle": true,
-                "offToggle": false,
-                "multiFeature/en-GB": true,
-                "multiFeature/en-US": true,
-                "noBoolToggle": null
-            };
-            client.getAll().should.be.eql(expected);
-        });
-
-        it("it should return an empty object for an application that does not have any keys", function(){
-            var expectedEmpty = {
-            };
-            client.getAll().should.be.eql(expectedEmpty);
-        });
-
-        it("it should return a null value for an application that does not exist", function(){
-            var expectedNull = null;
-            client.getAll().should.be.eql(expectedNull);
+        it("should return empty for an application that does not exist", function(done){
+            buildClient("nonExistantApp", function(client){
+                client.getAll().should.be.empty;
+                done();
+            });
         });
 
     });
@@ -259,7 +263,7 @@ describe("client", function(){
         var client;
 
         beforeEach(function(done){
-            client = new Client("anotherApp");
+            client = new Client("nonExistantApp");
             client.on("error", function(err){
                 throw err;
             });
