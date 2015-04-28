@@ -97,17 +97,6 @@ client.on('updated-cache', function(toggles){
 ]
 ```
 
-### .get(toggleName, [secondaryKey])
-
-Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return `null`.
-
-```javascript
-var isFeatureToggle1Enabled = client.get('featureToggle1');
-```
-
-- `toggleName` - the name of the toggle, used with the application name to get the feature toggle value
-- `secondaryKey` - used when accessing a multi feature-toggle (e.g. `get('domainFeature', 'com')`)
-
 ### .getOrDefault(toggleName, [secondaryKey], defaultValue)
 
 Gets the value of a feature toggle (`true` or `false`) if exists, otherwise return the default value (`true` or `false`)

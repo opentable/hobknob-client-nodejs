@@ -22,10 +22,6 @@ Client.prototype.initialise = function(callback){
     self.cache.initialise(callback);
 };
 
-Client.prototype.get = function(toggleName, secondaryKey){
-    return _getOrDefault(this.cache, toggleName, secondaryKey ? secondaryKey : null, null);
-};
-
 Client.prototype.getOrDefault = function(){
     var args = arguments,
         toggleName = args[0],
