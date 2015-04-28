@@ -37,8 +37,6 @@ client.initialise(function(err) {
         throw err;
     }
 
-    console.log(client.get("toggle1"));
-
     console.log(client.getOrDefault("toggle2", true));
 });
 ```
