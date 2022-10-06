@@ -1,4 +1,10 @@
-# hobknob-client-nodejs
+# Important
+
+Hobknob is deprecated and no longer actively supported. 
+
+If you are a contributor willing to take this project over then please get in touch via [search-experience@opentable.com](mailto:search-experience@opentable.com)
+
+## hobknob-client-nodejs
 
 > A node client to retrieve feature toggles stored in Etcd.
 
